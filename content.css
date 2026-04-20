@@ -81,6 +81,35 @@ body.ct-pick-active * {
   color: #666;
 }
 
+.ct-optional {
+  font-weight: 400;
+  text-transform: none;
+  color: #444;
+  font-size: 9px;
+}
+
+.ct-prefix-input {
+  display: block;
+  width: calc(100% - 28px);
+  margin: 0 14px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 7px;
+  color: #d4d4d4;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.ct-prefix-input::placeholder {
+  color: #3a3a3a;
+}
+.ct-prefix-input:focus {
+  border-color: #f0a500;
+}
+
 .ct-pick-btn {
   display: block;
   width: calc(100% - 28px);

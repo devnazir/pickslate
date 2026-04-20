@@ -47,10 +47,19 @@ Return ONLY a valid JSON object with this exact structure:
 Rules:
 - No markdown, no code fences, no explanation. Raw JSON only.
 - Preserve every key exactly as-is.
-- Keep placeholders like {name}, %s, {{var}} unchanged.
+- Keep existing placeholders like {name}, %s, {{var}} unchanged.
 - If the source text is already in English, keep it as-is in the English object.
 - If the source text is already in Indonesian, keep it as-is in the Indonesian object.
-- Translate naturally and professionally.`;
+- Translate naturally and professionally.
+- IMPORTANT — detect dynamic runtime values and replace them with {{placeholder}} syntax:
+  * Proper names of people (e.g. "Nazir", "John") → {{name}}
+  * Company or organization names (e.g. "NAZIR DEVELOPMENT", "Acme Corp") → {{company}}
+  * Numeric counts or amounts (e.g. "3 items", "100 users") → {{count}} items, {{count}} users
+  * Dates or times (e.g. "Monday", "Jan 1 2024") → {{date}}
+  * Any other value that is clearly injected at runtime → {{value}}
+  * Apply this to BOTH the English and Indonesian translations.
+  * Example: "Hello, Nazir 👋" → "Hello, {{name}} 👋" and "Halo, {{name}} 👋"
+  * Example: "Overview of NAZIR DEVELOPMENT" → "Overview of {{company}}" and "Gambaran umum {{company}}"`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -84,13 +93,20 @@ Rules:
 }
 
 function textToKey(text, index) {
-  // Convert text to a snake_case key, max 40 chars
-  const key = text
+  // Convert text to a camelCase key, max 40 chars
+  const words = text
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, "")
     .trim()
-    .replace(/\s+/g, "_")
-    .slice(0, 40)
-    .replace(/_+$/, "");
-  return key || `item_${index + 1}`;
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 8); // limit word count before slicing
+  if (!words.length) return `item${index + 1}`;
+  const camel =
+    words[0] +
+    words
+      .slice(1)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join("");
+  return camel.slice(0, 40) || `item${index + 1}`;
 }

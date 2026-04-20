@@ -43,6 +43,11 @@
 
       <div class="ct-divider"></div>
 
+      <div class="ct-section-label">3 · Key prefix <span class="ct-optional">(optional)</span></div>
+      <input class="ct-prefix-input" id="ct-prefix-input" type="text" placeholder="e.g. otpVerification or otpVerification.custom" spellcheck="false" />
+
+      <div class="ct-divider"></div>
+
       <button class="ct-translate-btn" id="ct-translate-btn" disabled>
         Translate →
       </button>
@@ -252,6 +257,7 @@
     const languages = LANGS.filter((l) => selectedLangs.has(l.code)).map(
       (l) => l.label
     );
+    const prefix = panel.querySelector("#ct-prefix-input")?.value.trim() || "";
 
     chrome.runtime.sendMessage(
       { type: "TRANSLATE_BATCH", items, languages },
@@ -261,13 +267,13 @@
         if (response?.error) {
           showError(response.error);
         } else if (response?.result) {
-          showResultModal(response.result);
+          showResultModal(response.result, prefix);
         }
       }
     );
   }
 
-  function showResultModal(result) {
+  function showResultModal(result, prefix = "") {
     if (resultModal) resultModal.remove();
 
     const { source, languages } = result;
@@ -313,7 +319,7 @@
         <span>Without header row</span>
       </label>
       <textarea class="ct-result-area" id="ct-csv-area" readonly>${escHtml(
-        buildCSV(source, languages, true)
+        buildCSV(source, languages, true, prefix)
       )}</textarea>
     `;
     for (const radio of body.querySelectorAll("input[name='ct-csv-header']")) {
@@ -322,7 +328,8 @@
         body.querySelector("#ct-csv-area").value = buildCSV(
           source,
           languages,
-          withHeader
+          withHeader,
+          prefix
         );
       });
     }
@@ -339,13 +346,14 @@
     });
   }
 
-  function buildCSV(source, languages, includeHeader = true) {
+  function buildCSV(source, languages, includeHeader = true, prefix = "") {
     const keys = Object.keys(source);
     const csvVal = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const applyPrefix = (key) => (prefix ? `${prefix}.${key}` : key);
     const rows = keys.map((key) => {
       const en = languages.English?.[key] ?? "";
       const id = languages.Indonesian?.[key] ?? "";
-      return [csvVal(key), csvVal(en), csvVal(id)].join(",");
+      return [csvVal(applyPrefix(key)), csvVal(en), csvVal(id)].join(",");
     });
     if (includeHeader) {
       return [`"key","en","id"`, ...rows].join("\n");
