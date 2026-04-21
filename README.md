@@ -1,3 +1,5 @@
+<img width="50" height="50" alt="icon" src="https://github.com/user-attachments/assets/05362d83-73a9-48eb-ae3d-d4c0fc86b3eb" />
+
 # Pickslate
 
 A Chrome extension that lets you pick any text elements on a webpage and instantly translate them into multiple languages — powered by your choice of AI provider (Anthropic, OpenAI, Gemini, Groq, OpenRouter, or GitHub Copilot). Export results as CSV or JSON, ready for your localization workflow.
